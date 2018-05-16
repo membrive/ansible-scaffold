@@ -1,0 +1,7 @@
+---
+- name: vagrant01
+  box: ubuntu/xenial64
+  memory: 1024
+  cpus: 1
+  ip: 172.28.128.2
+  ansible_playbook: ../playbook.yml

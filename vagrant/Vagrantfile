@@ -1,0 +1,42 @@
+# Specify Vagrant version and Vagrant API version
+Vagrant.require_version ">= 1.6.0"
+VAGRANTFILE_API_VERSION = "2"
+
+require 'yaml'
+
+machines = YAML.load_file(Dir.pwd + '/machines.yml')
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+    machines.each do |machine|
+        config.vm.define machine['name'] do |m|
+            m.vm.box = machine['box']
+
+            if machine['box_version'] then
+                m.vm.box_version = machine['box_version']
+            end
+            m.vm.hostname = machine['name']
+            m.vm.network 'private_network', ip: machine['ip']
+
+            m.vm.provider :virtualbox do |vb|
+                vb.memory = machine['memory']
+                vb.cpus = machine['cpus']
+            end
+
+            config.vm.synced_folder 'data/', '/data'
+
+            m.vm.provision :shell do |shell|
+                shell.inline = "apt-get update && apt-get install -y python"
+            end
+
+            m.vm.provision :ansible do |ansible|
+                ansible.playbook = machine['ansible_playbook']
+                ansible.inventory_path = Dir.pwd + '/../inventory.vagrant'
+                ansible.verbose = 'v'
+                ansible.config_file = '../ansible.cfg'
+                if machine['ansible_tags'] then
+                    ansible.tags = machine['ansible_tags']
+                end
+            end
+        end
+    end
+end
