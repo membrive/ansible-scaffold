@@ -1,0 +1,5 @@
+---
+# This is just an example of a role requirement, delete it if you want!
+- src: git+https://github.com/membrive/ansible-role-ssh-login-notifications
+  version: "0.1.0"
+  name: membrive.ssh-login-notifications
